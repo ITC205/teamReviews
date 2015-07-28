@@ -1,38 +1,45 @@
+package datamanagement;
+
+import java.io.IOException;
+import java.io.FileWriter;
+
+import org.jdom.JDOMException;
+import org.jdom.Document;
+import org.jdom.input.SAXBuilder;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
+
+
+
 /**
  * all about this class...
  */
-
-package datamanagement;
-
-import org.jdom.Document;
-import org.jdom.input.SAXBuilder;
-import java.io.FileWriter;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
-import java.io.IOException;
-import org.jdom.JDOMException;
-
-
-
 public class XmlManager
+  // or use same style as Java classes e.g. SAXBUilder ???
 {
   //===========================================================================
-  // Static data members
+  // Static variables
   //===========================================================================
 
   private static XmlManager instance_ = null;
 
   //===========================================================================
-  // Instance data members
+  // Instance variables
   //===========================================================================
 
   private Document document_;
 
   //===========================================================================
-  // Static initializer
+  // Constructors
   //===========================================================================
 
-  // null
+  /**
+   * restrict access to constructor
+   */
+  private XmlManager()
+  {
+    initialize();
+  }
 
   //===========================================================================
   // Static methods
@@ -45,12 +52,13 @@ public class XmlManager
   {
     if (instance_ == null ) {
       instance_ = new XmlManager();
+
     }
     return instance_;
   }
 
   //===========================================================================
-  // Instance initializer
+  // Instance methods: initializer
   //===========================================================================
 
   /**
@@ -58,43 +66,39 @@ public class XmlManager
    */
   public void initialize()
   {
-    String s =
-      AppProperties.getInstance().getProperties().getProperty("XMLFILE");
+    String xmlFile =
+        AppProperties.getInstance().getProperties().getProperty("XMLFILE");
+    // xmlFileName ???
+    // should be refactored - method & variable???
 
     try {
-      SAXBuilder b = new SAXBuilder();
-      b.setExpandEntities(true);
-      document_ = b.build(s);}
-
-    catch (JDOMException e) {
-      System.err.printf( "%s",
-                         "DBMD: XMLManager : initialize : caught JDOMException\n" );
-
-      throw new RuntimeException("DBMD: XMLManager : initialize : JDOMException");
+      SAXBuilder saxBuilder = new SAXBuilder();
+      saxBuilder.setExpandEntities(true);
+      document_ = saxBuilder.build(xmlFile);
+      // create and use a private setDocument() method ???
     }
 
-    catch (IOException e) {
-      System.err.printf( "%s",
-                         "DBMD: XMLManager : initialize : caught IOException\n" );
+    catch (JDOMException exception) {
+      System.err.printf( "%xmlfile", "DBMD: XMLManager : initialize : " +
+                         "caught JDOMException\n" );
+      // create string, log string and then use string in exception ???
 
-      throw new RuntimeException("DBMD: XMLManager : initialize : IOException");
+      throw new RuntimeException("DBMD: XMLManager : initialize : " +
+                                 "JDOMException");
+    }
+
+    catch (IOException exception) {
+      System.err.printf("%xmlfile", "DBMD: XMLManager : initialize : " +
+                         "caught IOException\n");
+
+      throw new RuntimeException("DBMD: XMLManager : initialize : " +
+                                 "IOException");
+      // as above ???
     }
   }
 
   //===========================================================================
-  // Instance constructors
-  //===========================================================================
-
-  /**
-   * restrict access to constructor
-   */
-  private XmlManager()
-  {
-    initialize();
-  }
-
-  //===========================================================================
-  // Instance methods
+  // Instance methods: primary
   //===========================================================================
 
   /**
@@ -102,24 +106,26 @@ public class XmlManager
    */
   public void saveDocument()
   {
-    String xmlfile =
+    String xmlFile =
         AppProperties.getInstance().getProperties().getProperty("XMLFILE");
 
-    try (FileWriter fout = new FileWriter(xmlfile)) {
-      XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
-      outputter.output( document_, fout);
-      fout.close();
+    try (FileWriter fileWriter = new FileWriter(xmlFile)) {
+      XMLOutputter xmlOutputter = new XMLOutputter(Format.getPrettyFormat());
+      xmlOutputter.output( document_, fileWriter );
+      fileWriter.close();
     }
 
-    catch (IOException ioe) {
+    catch (IOException exception) {
       System.err.printf("%s\n", "DBMD : XMLManager : saveDocument : Error " +
-                        "saving XML to " + xmlfile);
+                        "saving XML to " + xmlFile);
       throw new RuntimeException("DBMD: XMLManager : saveDocument : error " +
                                  "writing to file");
     }
   }
 
-
+  //===========================================================================
+  // Instance methods: accessors
+  //===========================================================================
 
   /**
    * @return document
